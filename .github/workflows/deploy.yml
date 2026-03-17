@@ -11,12 +11,16 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
+      env:
+        FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
    
     - name: Build Jar
       run: |
@@ -30,22 +34,22 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build Docker Image
-      run: docker build -t  ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0 .
 
     - name: Push Image to Docker Hub
       run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
 
     - name: SSH and Deploy to EC2
-      uses: appleboy/ssh-action@v1
+      uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        script: 
+        script: |
           docker stop hello-app || true
-          delete rm hello-app || true
-          docker pull  ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
-          docker run -d --name hello-app -p 8080:8080  ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
+          docker rm hello-app || true
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
+          docker run -d --name hello-app -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/hello-app:1.0.0
 
     
     
