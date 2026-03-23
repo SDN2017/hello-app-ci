@@ -21,7 +21,7 @@ public class HelloController {
     @GetMapping("/hello")
     public Map<String, String> hello() {
         Map<String, String> response = new HashMap<>();
-        response.put("message", "Hello from Spring Boot!...ECR");
+        response.put("message", "Hello from Spring Boot!....ECR");
         response.put("status", "success");
         return response;
     }
